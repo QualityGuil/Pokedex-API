@@ -1,41 +1,53 @@
-function getDataPokemon(id) {
+let id = 0;
 
-    fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0')
-        .then(data => data.json())
-        .then(data => {
-            // console.log(data);
-            document.getElementById('name').textContent = data.results[id].name;
-            return data.results[id].url
-        })
-        .then(data => {
-            fetch(data)
-                .then(data => data.json())
-                .then(data => {
-                    document.querySelector('img').src = data.sprites.front_default;
-                    // console.log(data.sprites.front_default);
-                })
-        })
+async function getPokemon(id) {
+    try {
+        // Conseguindo a url do pokemon em questão
+        const url = `https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        pokemon = data.results[id].url;
+        console.log(pokemon);
+
+        // Pegando as informações do pokemon diretamente
+        const urlPokemon = pokemon;
+        const responsePokemon = await fetch(urlPokemon);
+        const dataPokemon = await responsePokemon.json();
+        
+        return dataPokemon;
+
+    } catch (erro) {
+        console.log('Erro:', erro);
+    }
+}
+
+async function insertPokemon(id) {
+
+    const pokemon = await getPokemon(id);
+
+    // console.log(pokemon.name);
+    document.getElementById('name').textContent = pokemon.name;
+    document.getElementById('sprite__pokemon').src = pokemon.sprites.front_default;
 
 }
 
-let id = 0;
-
-getDataPokemon(id);
-
-const btnPrevious = document.getElementById('btn__previous');
-
-btnPrevious.addEventListener('click', () => {
-    if (id > 0) {
-        id--
-        getDataPokemon(id);
+document.getElementById('btn__previous').addEventListener('click', () => {
+    if (id === 0) {
+        insertPokemon(id);
     } else {
-        getDataPokemon(id);
+        id--
+        insertPokemon(id);
     }
-})
+});
 
-const btnNext = document.getElementById('btn__next');
+document.getElementById('btn__next').addEventListener('click', () => {
+    if (id === 1000) {
+        insertPokemon(id);
+    } else {
+        id++
+        insertPokemon(id);
+    }
+});
 
-btnNext.addEventListener('click', () => {
-    id++;
-    getDataPokemon(id);
-})
+insertPokemon(id);
